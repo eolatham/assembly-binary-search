@@ -6,9 +6,9 @@ To run: ./binary_search
 */
 
 .data
-.n: .space 16                # allocate memory for a scanf number variable
-.array: .quad 1, 2, 3, 4, 5  # allocate memory for an array of 5 numbers
-.search_elem: .quad 1        # allocate memory for a number to search for
+.n: .space 16                      # allocate memory for a scanf number variable
+.array: .quad 1, 2, 3, 4, 5        # allocate memory for an array of 5 numbers
+.search_elem: .quad 1              # allocate memory for a number to search for
 .array_prompt: .string "Build a sorted array...\n"
 .search_prompt: .string "\nSpecify an element to search for in the array...\n"
 .search_res: .string "\nResult of Binary Search for %i: %i\n"
@@ -65,7 +65,7 @@ take_input:
     movq $.scan, %rdi
     call print
     call scan
-    movq %rax, (%rbx, %r10, 8)     # insert into destination
+    movq %rax, (%rbx, %r10, 8)     # insert scanned value into destination
     inc %r10
     jmp .input_loop
 
@@ -79,28 +79,28 @@ Return the index of the element if it exists or -1 if it doesn't.
 %rcx: search element
 */
 binary_search:
-    cmpq %rsi, %rdx
+    cmpq %rsi, %rdx                # is hi > lo?
     jge .binary_search
     movq $-1, %rax
     ret
 .binary_search:
-    movq %rdx, %rax
-    subq %rsi, %rax
-    shr $1, %rax
-    addq %rsi, %rax                # %rax = l + (r - l) // 2 = mid
-    movq (%rdi, %rax, 8), %r10
-    cmpq %rcx, %r10
-    je .case1
-    jg .case2
-    jl .case3
+    movq %rdx, %rax                # %rax = hi
+    subq %rsi, %rax                # %rax = hi - lo
+    shr $1, %rax                   # %rax = %rax // 2
+    addq %rsi, %rax                # %rax = %rax + lo = mid
+    movq (%rdi, %rax, 8), %r10     # %r10 = array[mid]
+    cmpq %rcx, %r10                # compare search element with array[mid]
+    je .case1                      # array[mid] == search element
+    jg .case2                      # array[mid] > search element
+    jl .case3                      # array[mid] < search element
 .case1:
     ret
 .case2:
-    leaq -1(%rax), %rdx
-    jmp binary_search
+    leaq -1(%rax), %rdx            # hi = mid - 1
+    jmp binary_search              # continue searching in lower half
 .case3:
-    leaq 1(%rax), %rsi
-    jmp binary_search
+    leaq 1(%rax), %rsi             # lo = mid + 1
+    jmp binary_search              # continue searching in upper half
 
 /*
 Use printf to safely print the format string pointed to by %rdi to stdout.
@@ -133,12 +133,10 @@ print:
     ret
 
 /*
-Use scanf to safely scan for a value from stdin.
-Push and pop registers to preserve their values
-and use a stack canary for added compatibility.
-
-%rdi: format string
-%rsi: scan destination
+Use scanf to safely scan for an integer value from stdin, passing .format
+as the format string and .n for temporary destination storage.
+Push and pop registers to preserve their values and use
+a stack canary for added system compatibility.
 */
 scan:
     push %rbx
@@ -150,7 +148,7 @@ scan:
 	leaq .n(%rip), %rsi            # param 2, scan destination
 	call __isoc99_scanf@PLT        # scanf function call
 	addq $64, %rsp                 # stack canary reset
-    movq .n(%rip), %rax
+    movq .n(%rip), %rax            # move scanned value to %rax for return
     pop %r10
     pop %rcx
     pop %rbx
