@@ -8,7 +8,7 @@
 
 ## **Description**
 
-I initially wrote this program for a homework in a computer organization and Assembly language course taught by [Dr. Mahmut Unan](https://www.uab.edu/cas/computerscience/people/faculty-directory/mahmut-unan) at [UAB](https://www.uab.edu/) , and then I polished it.
+I initially wrote this program for a homework assignment in a computer organization and Assembly language course taught by [Dr. Mahmut Unan](https://www.uab.edu/cas/computerscience/people/faculty-directory/mahmut-unan) at [UAB](https://www.uab.edu/), and then I polished it.
 
 This program is an interactive binary search program written in AT&T `x86_64` Assembly (GNU Assembly).
 
