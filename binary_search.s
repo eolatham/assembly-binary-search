@@ -19,27 +19,27 @@ To run: ./binary_search
 .global main
 
 main:
-    movq $.array_prompt,  %rdi     #
-    call print                     #
-    movq $.array, %rdi             #
-    movq $5, %rsi                  # set array length to be 5
-    call take_input                # create array from user input
+    movq $.array_prompt,  %rdi     # string to print = .array_prompt
+    call print                     # print .array_prompt
+    movq $.array, %rdi             # array pointer parameter = .array
+    movq $5, %rsi                  # array length parameter = 5
+    call take_input                # .array = array created with user input
 
-    movq $.search_prompt, %rdi     #
-    call print                     #
-    movq $.search_elem,   %rdi     #
-    movq $1,              %rsi     #
-    call take_input                # get search element from user input
+    movq $.search_prompt, %rdi     # string to print = .search_prompt
+    call print                     # print .search_prompt
+    movq $.search_elem,   %rdi     # array pointer parameter = .search_elem
+    movq $1,              %rsi     # array length parameter = 1
+    call take_input                # .search_elem = search element from user input
 
-    movq $.array,         %rdi     #
-    movq $0,              %rsi     #
-    movq $4,              %rdx     #
-    movq .search_elem,    %rcx     #
-    call binary_search             # search for the element using binary search
+    movq $.array,         %rdi     # array pointer parameter = .array
+    movq $0,              %rsi     # lo index parameter = 0
+    movq $4,              %rdx     # hi index parameter = 4
+    movq .search_elem,    %rcx     # search element parameter = .search_elem
+    call binary_search             # %rax = result of binary search for .search_elem
 
-    movq $.search_result, %rdi     #
-    movq .search_elem,    %rsi     #
-    movq %rax,            %rdx     #
+    movq $.search_result, %rdi     # format string to print = .search_result
+    movq .search_elem,    %rsi     # first value to print = .search_elem
+    movq %rax,            %rdx     # second value to print = %rax
     call print                     # print result of search
 
     ret                            # exit program
@@ -61,8 +61,8 @@ take_input:
     jg   .inside_input_loop        # jump to .inside_input_loop if %r14 < %r13
     ret                            # return control to caller
 .inside_input_loop:
-    movq $.scan, %rdi              # string to print = $.scan
-    call print                     # print $.scan
+    movq $.scan, %rdi              # string to print = .scan
+    call print                     # print .scan
     call scan_int                  # %rax = integer read from stdin
     movq %rax,   (%r12, %r14, 8)   # array[i] = %rax
     inc  %r14                      # ++i
@@ -90,8 +90,8 @@ binary_search:
     movq (%rdi, %rax, 8), %r10     # %r10 = array[mid]
     cmpq %rcx,            %r10     # compare search element with array[mid]
     je   .match_case               # array[mid] == search element
-    jg   .too_hi_case              # array[mid] >  search element
-    jl   .too_lo_case              # array[mid] <  search element
+    jg   .too_hi_case              # array[mid] > search element
+    jl   .too_lo_case              # array[mid] < search element
 .match_case:
     ret                            # return mid
 .too_hi_case:
