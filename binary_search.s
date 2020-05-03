@@ -19,30 +19,30 @@ To run: ./binary_search
 .global main
 
 main:
-    movq $.array_prompt, %rdi
-    call print
-    movq $.array, %rdi
+    movq $.array_prompt,  %rdi     #
+    call print                     #
+    movq $.array, %rdi             #
     movq $5, %rsi                  # set array length to be 5
     call take_input                # create array from user input
 
-    movq $.search_prompt, %rdi
-    call print
-    movq $.search_elem, %rdi
-    movq $1, %rsi
+    movq $.search_prompt, %rdi     #
+    call print                     #
+    movq $.search_elem,   %rdi     #
+    movq $1,              %rsi     #
     call take_input                # get search element from user input
 
-    movq $.array, %rdi
-    movq $0, %rsi
-    movq $4, %rdx
-    movq .search_elem, %rcx
+    movq $.array,         %rdi     #
+    movq $0,              %rsi     #
+    movq $4,              %rdx     #
+    movq .search_elem,    %rcx     #
     call binary_search             # search for the element using binary search
 
-    movq $.search_result, %rdi
-    movq .search_elem, %rsi
-    movq %rax, %rdx
-    call print                     # print the result of search
+    movq $.search_result, %rdi     #
+    movq .search_elem,    %rsi     #
+    movq %rax,            %rdx     #
+    call print                     # print result of search
 
-    ret
+    ret                            # exit program
 
 /*
 Read %rsi integers from stdin and assign them
@@ -52,21 +52,21 @@ to array addresses starting with %rdi.
 %rsi: array length
 */
 take_input:
-    movq %rdi, %rbx                # %rbx = destination pointer
-    movq %rsi, %rcx                # %rcx = number of iterations
-    movq $0, %r10                  # %r10 = i
-    jmp .input_loop
+    movq %rdi,   %r12              # %r12 = destination pointer
+    movq %rsi,   %r13              # %r13 = number of iterations
+    movq $0,     %r14              # %r14 = i
+    jmp  .input_loop               # jump to .input_loop
 .input_loop:
-    cmpq %r10, %rcx
-    jg .inside_input_loop
-    ret
+    cmpq %r14,   %r13              # see if %r14 < %r13
+    jg   .inside_input_loop        # jump to .inside_input_loop if %r14 < %r13
+    ret                            # return control to caller
 .inside_input_loop:
-    movq $.scan, %rdi
-    call print
-    call scan_int
-    movq %rax, (%rbx, %r10, 8)     # insert scanned value into destination
-    inc %r10
-    jmp .input_loop
+    movq $.scan, %rdi              # string to print = $.scan
+    call print                     # print $.scan
+    call scan_int                  # %rax = integer read from stdin
+    movq %rax,   (%r12, %r14, 8)   # array[i] = %rax
+    inc  %r14                      # ++i
+    jmp  .input_loop               # jump to .input_loop
 
 /*
 Search for %rcx in the sorted array pointed to by %rdi.
@@ -78,58 +78,47 @@ Return the index of the element if it exists or -1 if it doesn't.
 %rcx: search element
 */
 binary_search:
-    cmpq %rsi, %rdx                # is hi > lo?
-    jge .binary_search
-    movq $-1, %rax
-    ret
+    cmpq %rsi,            %rdx     # see if hi > lo
+    jge  .binary_search            # jump to .binary_search if hi > lo
+    movq $-1,             %rax     # move -1 into %rax
+    ret                            # return -1
 .binary_search:
-    movq %rdx, %rax                # %rax = hi
-    subq %rsi, %rax                # %rax = hi - lo
-    shr $1, %rax                   # %rax = %rax // 2
-    addq %rsi, %rax                # %rax = %rax + lo = mid
+    movq %rdx,            %rax     # %rax = hi
+    subq %rsi,            %rax     # %rax = hi - lo
+    shr  $1,              %rax     # %rax = %rax // 2
+    addq %rsi,            %rax     # %rax = %rax + lo = mid
     movq (%rdi, %rax, 8), %r10     # %r10 = array[mid]
-    cmpq %rcx, %r10                # compare search element with array[mid]
-    je .case1                      # array[mid] == search element
-    jg .case2                      # array[mid] > search element
-    jl .case3                      # array[mid] < search element
-.case1:
-    ret
-.case2:
-    leaq -1(%rax), %rdx            # hi = mid - 1
-    jmp binary_search              # continue searching in lower half
-.case3:
-    leaq 1(%rax), %rsi             # lo = mid + 1
-    jmp binary_search              # continue searching in upper half
+    cmpq %rcx,            %r10     # compare search element with array[mid]
+    je   .match_case               # array[mid] == search element
+    jg   .too_hi_case              # array[mid] >  search element
+    jl   .too_lo_case              # array[mid] <  search element
+.match_case:
+    ret                            # return mid
+.too_hi_case:
+    leaq -1(%rax),        %rdx     # hi = mid - 1
+    jmp  binary_search             # continue searching in lower half
+.too_lo_case:
+    leaq 1(%rax),         %rsi     # lo = mid + 1
+    jmp  binary_search             # continue searching in upper half
 
 /*
 Use printf to safely print the format string pointed to by %rdi to stdout.
-Push and pop registers to preserve their values,
-as printf has unwanted side-effects.
+Push and pop variable registers to save their values.
 
 %rdi: format string
-%rsi: variable
+%rsi: value to print
 ...
 */
 print:
-    push %rax
-    push %rbx
-    push %rcx
-    push %r10
-    push %r11
-    push %r12
-    push %r13
-    push %r14
-    xorq %rax, %rax
-    call printf
-    pop %r14
-    pop %r13
-    pop %r12
-    pop %r11
-    pop %r10
-    pop %rcx
-    pop %rbx
-    pop %rax
-    ret
+    push %r12                      # save variable register value
+    push %r13                      # save variable register value
+    push %r14                      # save variable register value
+    xorq %rax, %rax                # empty %rax
+    call printf                    # call printf
+    pop %r14                       # restore variable register value
+    pop %r13                       # restore variable register value
+    pop %r12                       # restore variable register value
+    ret                            # return control to caller
 
 /*
 To clear the stdin input buffer after a failed scanf call, read input
@@ -139,45 +128,45 @@ if '\n' is reached and exiting the program if EOF is reached.
 clear_input_buffer:
 .read_loop:
     call getchar                   # %eax = char (4-byte int)
-    cmp $10, %eax                  # see if %eax == '\n'
-    je .newline_case               # jump to .newline_case if %eax == '\n'
+    cmp  $10,  %eax                # see if %eax == '\n'
+    je   .newline_case             # jump to .newline_case if %eax == '\n'
     test %eax, %eax                # set flags according to %eax
-    js .eof_case                   # jump to .eof_case if %eax is negative
-    jmp .read_loop                 # continue loop
+    js   .eof_case                 # jump to .eof_case if %eax is negative
+    jmp  .read_loop                # continue loop
 .newline_case:
-    ret
+    ret                            # return control to caller
 .eof_case:
-    movq $0, %rdi
+    movq $0, %rdi                  # exit status = 0
     call exit                      # exit(0)
 
 /*
 Use scanf to safely scan for an integer value from stdin, passing .format
 as the format string and .temp for temporary destination storage.
-Push and pop registers to preserve their values and use
-a stack canary for added system compatibility.
+Push and pop variable registers to save their values and
+use a stack canary for added system compatibility.
 */
 scan_int:
-    push %rbx
-    push %rcx
-    push %r10
-    subq $64, %rsp                 # stack canary
-	movq $.format, %rdi            # set param 1: format string
-	leaq .temp(%rip), %rsi         # set param 2: scan destination
-    xorq %rax, %rax                # empty %rax
+    push %r12                      # save variable register value
+    push %r13                      # save variable register value
+    push %r14                      # save variable register value
+    subq $64,         %rsp         # stack canary
+	movq $.format,    %rdi         # set format string parameter
+	leaq .temp(%rip), %rsi         # set scan destination parameter
+    xorq %rax,        %rax         # empty %rax
 	call __isoc99_scanf@PLT        # call scanf
-    addq $64, %rsp                 # reset stack canary
-    cmpq $1, %rax                  # see if scanf succeeded
-    je .success                    # jump to .success if scanf succeeded
-    jmp .default                   # jump to .default if scanf failed
+    addq $64,         %rsp         # reset stack canary
+    cmpq $1,          %rax         # see if scanf succeeded
+    je   .success                  # jump to .success if scanf succeeded
+    jmp  .default                  # jump to .default if scanf failed
 .success:
-    movq .temp(%rip), %rax         # return scanned value
-    jmp .return
+    movq .temp(%rip), %rax         # move scanned value into %rax
+    jmp .return                    # return scanned value
 .default:
     call clear_input_buffer        # clear input buffer for next scanf call
-    movq $0, %rax                  # return default value
-    jmp .return
+    movq $0,          %rax         # move default value into %rax
+    jmp .return                    # return default value
 .return:
-    pop %r10
-    pop %rcx
-    pop %rbx
-    ret
+    pop %r14                       # restore variable register value
+    pop %r13                       # restore variable register value
+    pop %r12                       # restore variable register value
+    ret                            # return %rax
