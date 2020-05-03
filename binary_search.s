@@ -183,10 +183,10 @@ scan_int:
     push %rcx                            # save variable register value
     push %rbx                            # save variable register value
     sub  $64,           %rsp             # stack canary
-	mov  $.scan_format, %edi             # set format string parameter
-	lea  .temp(%rip),   %esi             # set scan destination parameter
+    mov  $.scan_format, %edi             # set format string parameter
+    lea  .temp(%rip),   %esi             # set scan destination parameter
     xor  %eax,          %eax             # empty %eax
-	call __isoc99_scanf@PLT              # call scanf
+    call __isoc99_scanf@PLT              # call scanf
     add  $64,           %rsp             # reset stack canary
     cmp  $1,            %eax             # see if scanf succeeded
     je   .success                        # jump to .success if scanf succeeded
