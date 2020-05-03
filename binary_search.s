@@ -6,118 +6,118 @@ To run: ./binary_search
 */
 
 .data
-.temp: .space 16                   # allocate memory for temporary scanf number variable
-.array: .quad 1, 2, 3, 4, 5        # allocate memory for array of 5 numbers
-.search_elem: .quad 1              # allocate memory for search element
+.temp: .space 4                    # 4-byte integer scanf temporary variable
+.array: .long 0, 0, 0, 0, 0        # 4-byte integer array of length 5
+.search_elem: .long 1              # 4-byte integer search element
 .array_prompt: .string "Build a sorted array...\n"
 .search_prompt: .string "\nSpecify an element to search for in the array...\n"
 .search_result: .string "\nResult of Binary Search for %i: %i\n"
 .scan: .string "Enter an integer: "
-.format: .string "%d"              # format string for scanning and printing integers
+.format: .string "%d"
 
 .text
 .global main
 
 main:
-    movq $.array_prompt,  %rdi     # string to print = .array_prompt
+    mov  $.array_prompt,  %edi     # string to print = .array_prompt
     call print                     # print .array_prompt
-    movq $.array, %rdi             # array pointer parameter = .array
-    movq $5, %rsi                  # array length parameter = 5
+    mov  $.array, %edi             # array pointer parameter = .array
+    mov  $5, %esi                  # array length parameter = 5
     call take_input                # .array = array created with user input
 
-    movq $.search_prompt, %rdi     # string to print = .search_prompt
+    mov  $.search_prompt, %edi     # string to print = .search_prompt
     call print                     # print .search_prompt
-    movq $.search_elem,   %rdi     # array pointer parameter = .search_elem
-    movq $1,              %rsi     # array length parameter = 1
+    mov  $.search_elem,   %edi     # array pointer parameter = .search_elem
+    mov  $1,              %esi     # array length parameter = 1
     call take_input                # .search_elem = search element from user input
 
-    movq $.array,         %rdi     # array pointer parameter = .array
-    movq $0,              %rsi     # lo index parameter = 0
-    movq $4,              %rdx     # hi index parameter = 4
-    movq .search_elem,    %rcx     # search element parameter = .search_elem
-    call binary_search             # %rax = result of binary search for .search_elem
+    mov  $.array,         %edi     # array pointer parameter = .array
+    mov  $0,              %esi     # lo index parameter = 0
+    mov  $4,              %edx     # hi index parameter = 4
+    mov  .search_elem,    %ecx     # search element parameter = .search_elem
+    call binary_search             # %eax = result of binary search for .search_elem
 
-    movq $.search_result, %rdi     # format string to print = .search_result
-    movq .search_elem,    %rsi     # first value to print = .search_elem
-    movq %rax,            %rdx     # second value to print = %rax
+    mov  $.search_result, %edi     # format string to print = .search_result
+    mov  .search_elem,    %esi     # first value to print = .search_elem
+    mov  %eax,            %edx     # second value to print = %eax
     call print                     # print result of search
 
     ret                            # exit program
 
 /*
-Read %rsi integers from stdin and assign them
-to array addresses starting with %rdi.
+Read %esi integers from stdin and assign them
+to array addresses starting with %edi.
 
-%rdi: array pointer
-%rsi: array length
+%edi: array pointer
+%esi: array length
 */
 take_input:
-    movq %rdi,   %r12              # %r12 = destination pointer
-    movq %rsi,   %r13              # %r13 = number of iterations
-    movq $0,     %r14              # %r14 = i
+    mov  %edi,   %edx              # %edx = destination pointer
+    mov  %esi,   %ecx              # %ecx = number of iterations
+    mov  $0,     %ebx              # %ebx = i
     jmp  .input_loop               # jump to .input_loop
 .input_loop:
-    cmpq %r14,   %r13              # see if %r14 < %r13
-    jg   .inside_input_loop        # jump to .inside_input_loop if %r14 < %r13
+    cmp  %ebx,   %ecx              # see if %ebx < %ecx
+    jg   .inside_input_loop        # jump to .inside_input_loop if %ebx < %ecx
     ret                            # return control to caller
 .inside_input_loop:
-    movq $.scan, %rdi              # string to print = .scan
+    mov  $.scan, %edi              # string to print = .scan
     call print                     # print .scan
-    call scan_int                  # %rax = integer read from stdin
-    movq %rax,   (%r12, %r14, 8)   # array[i] = %rax
-    inc  %r14                      # ++i
+    call scan_int                  # %eax = integer read from stdin
+    mov  %eax,   (%edx, %ebx, 8)   # array[i] = %eax
+    inc  %ebx                      # ++i
     jmp  .input_loop               # jump to .input_loop
 
 /*
-Search for %rcx in the sorted array pointed to by %rdi.
+Search for %ecx in the sorted array pointed to by %edi.
 Return the index of the element if it exists or -1 if it doesn't.
 
-%rdi: array pointer
-%rsi: lo index
-%rdx: hi index
-%rcx: search element
+%edi: array pointer
+%esi: lo index
+%edx: hi index
+%ecx: search element
 */
 binary_search:
-    cmpq %rsi,            %rdx     # see if hi > lo
+    cmp  %esi,            %edx     # see if hi > lo
     jge  .binary_search            # jump to .binary_search if hi > lo
-    movq $-1,             %rax     # move -1 into %rax
+    mov  $-1,             %eax     # move -1 into %eax
     ret                            # return -1
 .binary_search:
-    movq %rdx,            %rax     # %rax = hi
-    subq %rsi,            %rax     # %rax = hi - lo
-    shr  $1,              %rax     # %rax = %rax // 2
-    addq %rsi,            %rax     # %rax = %rax + lo = mid
-    movq (%rdi, %rax, 8), %r10     # %r10 = array[mid]
-    cmpq %rcx,            %r10     # compare search element with array[mid]
+    mov  %edx,            %eax     # %eax = hi
+    sub  %esi,            %eax     # %eax = hi - lo
+    shr  $1,              %eax     # %eax = %eax // 2
+    add  %esi,            %eax     # %eax = %eax + lo = mid
+    mov  (%edi, %eax, 8), %ebx     # %ebx = array[mid]
+    cmp  %ecx,            %ebx     # compare search element with array[mid]
     je   .match_case               # array[mid] == search element
     jg   .too_hi_case              # array[mid] > search element
     jl   .too_lo_case              # array[mid] < search element
 .match_case:
     ret                            # return mid
 .too_hi_case:
-    leaq -1(%rax),        %rdx     # hi = mid - 1
+    lea  -1(%eax),        %edx     # hi = mid - 1
     jmp  binary_search             # continue searching in lower half
 .too_lo_case:
-    leaq 1(%rax),         %rsi     # lo = mid + 1
+    lea  1(%eax),         %esi     # lo = mid + 1
     jmp  binary_search             # continue searching in upper half
 
 /*
-Use printf to safely print the format string pointed to by %rdi to stdout.
+Use printf to safely print the format string pointed to by %edi to stdout.
 Push and pop variable registers to save their values.
 
-%rdi: format string
-%rsi: value to print
+%edi: format string
+%esi: value to print
 ...
 */
 print:
-    push %r12                      # save variable register value
-    push %r13                      # save variable register value
-    push %r14                      # save variable register value
-    xorq %rax, %rax                # empty %rax
+    push %rdx                      # save variable register value
+    push %rcx                      # save variable register value
+    push %rbx                      # save variable register value
+    xor  %eax, %eax                # empty %eax
     call printf                    # call printf
-    pop %r14                       # restore variable register value
-    pop %r13                       # restore variable register value
-    pop %r12                       # restore variable register value
+    pop  %rbx                      # restore variable register value
+    pop  %rcx                      # restore variable register value
+    pop  %rdx                      # restore variable register value
     ret                            # return control to caller
 
 /*
@@ -136,7 +136,7 @@ clear_input_buffer:
 .newline_case:
     ret                            # return control to caller
 .eof_case:
-    movq $0, %rdi                  # exit status = 0
+    mov  $0, %edi                  # exit status = 0
     call exit                      # exit(0)
 
 /*
@@ -146,27 +146,27 @@ Push and pop variable registers to save their values and
 use a stack canary for added system compatibility.
 */
 scan_int:
-    push %r12                      # save variable register value
-    push %r13                      # save variable register value
-    push %r14                      # save variable register value
-    subq $64,         %rsp         # stack canary
-	movq $.format,    %rdi         # set format string parameter
-	leaq .temp(%rip), %rsi         # set scan destination parameter
-    xorq %rax,        %rax         # empty %rax
+    push %rdx                      # save variable register value
+    push %rcx                      # save variable register value
+    push %rbx                      # save variable register value
+    sub  $64,         %rsp         # stack canary
+	mov  $.format,    %edi         # set format string parameter
+	lea  .temp(%rip), %esi         # set scan destination parameter
+    xor  %eax,        %eax         # empty %eax
 	call __isoc99_scanf@PLT        # call scanf
-    addq $64,         %rsp         # reset stack canary
-    cmpq $1,          %rax         # see if scanf succeeded
+    add  $64,         %rsp         # reset stack canary
+    cmp  $1,          %eax         # see if scanf succeeded
     je   .success                  # jump to .success if scanf succeeded
     jmp  .default                  # jump to .default if scanf failed
 .success:
-    movq .temp(%rip), %rax         # move scanned value into %rax
-    jmp .return                    # return scanned value
+    mov  .temp(%rip), %eax         # move scanned value into %eax
+    jmp  .return                   # return scanned value
 .default:
     call clear_input_buffer        # clear input buffer for next scanf call
-    movq $0,          %rax         # move default value into %rax
-    jmp .return                    # return default value
+    mov  $0,          %eax         # move default value into %eax
+    jmp  .return                   # return default value
 .return:
-    pop %r14                       # restore variable register value
-    pop %r13                       # restore variable register value
-    pop %r12                       # restore variable register value
-    ret                            # return %rax
+    pop  %rbx                      # restore variable register value
+    pop  %rcx                      # restore variable register value
+    pop  %rdx                      # restore variable register value
+    ret                            # return %eax
