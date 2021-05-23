@@ -1,4 +1,4 @@
-# **Binary Search**
+# **Assembly Binary Search**
 
 #### Author: Eric Latham
 
