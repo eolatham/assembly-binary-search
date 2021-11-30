@@ -1,4 +1,4 @@
-# **Assembly Binary Search**
+# Assembly Binary Search
 
 #### Author: Eric Latham
 
@@ -6,15 +6,15 @@
 
 ---
 
-## **Description**
+## Description
 
 I initially wrote this program for a homework assignment in a computer organization and Assembly language course taught by [Dr. Mahmut Unan](https://www.uab.edu/cas/computerscience/people/faculty-directory/mahmut-unan) at [UAB](https://www.uab.edu/), and then I polished it.
 
 This program is an interactive binary search program written in `x86_64` AT&T Assembly that allows the user to create a sorted array of integers and search for an element inside it.
 
-## **Instructions**
+## Instructions
 
-### **To Compile**
+### To Compile
 
 Use any of the following commands:
 
@@ -22,7 +22,7 @@ Use any of the following commands:
 - `gcc -Wall -no-pie -o binary_search binary_search.s` (for GCC 9 or newer)
 - `gcc -Wall -o binary_search binary_search.s` (for older versions of GCC)
 
-### **To Run**
+### To Run
 
 Use the following command:
 
